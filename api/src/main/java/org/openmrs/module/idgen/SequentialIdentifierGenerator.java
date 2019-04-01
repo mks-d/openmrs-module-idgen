@@ -27,14 +27,14 @@ import org.openmrs.validator.PatientIdentifierValidator;
 public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 
 	//***** PROPERTIES *****
-	protected Long nextSequenceValue; //not used: declared only so that Hibernate creates the column when running tests
-	protected String prefix; // Optional prefix
-	protected String suffix; // Optional suffix
-	protected String firstIdentifierBase; // First identifier to start at
-	protected Integer minLength; // If > 0, will always return identifiers with a minimum of this length
-	protected Integer maxLength; // If > 0, will always return identifiers no longer than this length
-	protected String baseCharacterSet; // Enables configuration in appropriate Base	                                               
-	protected Boolean isLocationPrefixedIdentifierSource = Boolean.FALSE; // Determines whether this generator should produce LocationPrefixedIdentifiers
+	private Long nextSequenceValue; //not used: declared only so that Hibernate creates the column when running tests
+	private String prefix; // Optional prefix
+	private String suffix; // Optional suffix
+	private String firstIdentifierBase; // First identifier to start at
+	private Integer minLength; // If > 0, will always return identifiers with a minimum of this length
+	private Integer maxLength; // If > 0, will always return identifiers no longer than this length
+	private String baseCharacterSet; // Enables configuration in appropriate Base	                                               
+	private Boolean isLocationPrefixedIdentifierSource = Boolean.FALSE; // Determines whether this generator should produce LocationPrefixedIdentifiers
 	private final String DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT = "[A-Z]{3,4}\\-[0]{3}\\-[0-9]{3}"; 
 	private final String BRIDGE_FORMATING_FOR_LOCATION_PREFIXED_ID = "-000-";
 
@@ -81,6 +81,7 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 		String identifier = IdgenUtil.convertToBase(seed, baseCharacterSet.toCharArray(), seqLength);
 
     	// Add optional prefix and suffix
+		// TODO: Do we really need this for LocationPrefixedIdentifierSources?
     	identifier = (suffix == null ? identifier : identifier + suffix);
 
     	// Add prefix
@@ -109,10 +110,8 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     	}
     	
     	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getFormat()) && isLocationPrefixedIdentifierSource) {
-    		System.out.println("Id " + identifier + ", format " + getIdentifierType().getFormat());
     		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, getIdentifierType().getFormat());
     	} else if (getIdentifierType() != null && isLocationPrefixedIdentifierSource) {
-    		System.out.println("Id " + identifier + ", format ");
     		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT);
     	}
     	
