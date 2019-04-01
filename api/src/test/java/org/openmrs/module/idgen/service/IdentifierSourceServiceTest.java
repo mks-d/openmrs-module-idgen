@@ -16,6 +16,7 @@ package org.openmrs.module.idgen.service;
 import org.hibernate.NonUniqueResultException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.Location;
 import org.openmrs.PatientIdentifierType;
@@ -61,6 +62,13 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 		IdentifierSource is = identifierSourceService.getIdentifierSource(1);
 		List<String>  sig = identifierSourceService.generateIdentifiers(is, 7, "hello");
 		Assert.assertEquals(sig.toString(), "[G-0, H-8, I-5, J-3, K-1, L-9, M-7]");
+	}
+	
+	@Ignore
+	@Test
+	public void generateIdentifiers_shouldReturnLocationPrefixedIdentifiers() {
+		IdentifierSource is = identifierSourceService.getIdentifierSource(8);
+		List<String>  sig = identifierSourceService.generateIdentifiers(is, 7, null);
 	}
 
 	/**
@@ -223,7 +231,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
     public void getIdentifierSourcesByPatientIdentifierType_shouldGetIdentifierSourcesByPatientIdentifierType() {
         PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierType(1);
         List<IdentifierSource> identifierSource = identifierSourceService.getIdentifierSourcesByType(patientIdentifierType);
-        Assert.assertEquals(2, identifierSource.size());
+        Assert.assertEquals(3, identifierSource.size());
     }
 
     @Test

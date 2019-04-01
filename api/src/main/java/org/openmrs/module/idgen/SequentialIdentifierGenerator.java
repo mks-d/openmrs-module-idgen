@@ -14,9 +14,12 @@
 package org.openmrs.module.idgen;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.patient.IdentifierValidator;
+import org.openmrs.validator.PatientIdentifierValidator;
 
 /**
  * Auto-generating Identifier Source, which returns Identifiers in sequence
@@ -24,17 +27,20 @@ import org.openmrs.patient.IdentifierValidator;
 public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 
 	//***** PROPERTIES *****
-	private Long nextSequenceValue; //not used: declared only so that Hibernate creates the column when running tests
-    private String prefix; // Optional prefix
-    private String suffix; // Optional suffix
-    private String firstIdentifierBase; // First identifier to start at
-	private Integer minLength; // If > 0, will always return identifiers with a minimum of this length
-	private Integer maxLength; // If > 0, will always return identifiers no longer than this length
-    private String baseCharacterSet; // Enables configuration in appropriate Base
+	protected Long nextSequenceValue; //not used: declared only so that Hibernate creates the column when running tests
+	protected String prefix; // Optional prefix
+	protected String suffix; // Optional suffix
+	protected String firstIdentifierBase; // First identifier to start at
+	protected Integer minLength; // If > 0, will always return identifiers with a minimum of this length
+	protected Integer maxLength; // If > 0, will always return identifiers no longer than this length
+	protected String baseCharacterSet; // Enables configuration in appropriate Base	                                               
+	protected Boolean isLocationPrefixedIdentifierSource = Boolean.FALSE; // Determines whether this generator should produce LocationPrefixedIdentifiers
+	private final String DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT = "[A-Z]{3,4}\\-[0]{3}\\-[0-9]{3}"; 
+	private final String BRIDGE_FORMATING_FOR_LOCATION_PREFIXED_ID = "-000-";
 
     //***** INSTANCE METHODS *****
 
-    /**
+	/**
      * Returns a boolean indicating whether this generator has already started producing identifiers
      */
     public boolean isInitialized() {
@@ -52,17 +58,46 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
      */
     public String getIdentifierForSeed(long seed) {
 
+    	// If this is a location-prefixed source and has not yet produced any identifiers; Initialize the prefix
+    	if (isLocationPrefixedIdentifierSource && !isInitialized() || StringUtils.isEmpty(prefix)) {
+    		Location currentLocation = Context.getUserContext().getLocation();
+    		if (currentLocation != null) {
+    			Location parentLocation = currentLocation.getParentLocation();
+    			if (parentLocation != null) {
+    				for (Object ob : parentLocation.getActiveAttributes().toArray()) {
+    					LocationAttribute att = (LocationAttribute) ob;
+    					// TODO : Handle hardcoding for 'Prefix', introduce a GP for it?
+    					if (att.getAttributeType().getName().equals("Prefix")) {
+    						// Set the prefix
+    						prefix = (String) att.getValue();
+    					}
+    				}
+    			}
+    		}
+    	}
     	// Convert the next sequence integer into a String with the appropriate Base characters
 		int seqLength = firstIdentifierBase == null ? 1 : firstIdentifierBase.length();
 
 		String identifier = IdgenUtil.convertToBase(seed, baseCharacterSet.toCharArray(), seqLength);
 
     	// Add optional prefix and suffix
-    	identifier = (prefix == null ? identifier : prefix + identifier);
     	identifier = (suffix == null ? identifier : identifier + suffix);
 
+    	// Add prefix
+		if (StringUtils.isNotEmpty(prefix)) {
+			
+			if (isLocationPrefixedIdentifierSource) {
+				// append the formating "000" to the prefix
+				identifier = prefix + BRIDGE_FORMATING_FOR_LOCATION_PREFIXED_ID + identifier;
+			} else {
+				identifier = prefix + identifier;
+			}
+		} else if (isLocationPrefixedIdentifierSource) {
+			throw new RuntimeException("Invalid configuration for a location prefixed IdentifierSource. Prefix can't be empty");
+		}
+		
     	// Add check-digit, if required
-    	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getValidator())) {
+    	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getValidator()) && !isLocationPrefixedIdentifierSource) {
     		try {
 	    		Class<?> c = Context.loadClass(getIdentifierType().getValidator());
 	    		IdentifierValidator v = (IdentifierValidator)c.newInstance();
@@ -72,7 +107,15 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     			throw new RuntimeException("Error generating check digit with " + getIdentifierType().getValidator(), e);
     		}
     	}
-
+    	
+    	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getFormat()) && isLocationPrefixedIdentifierSource) {
+    		System.out.println("Id " + identifier + ", format " + getIdentifierType().getFormat());
+    		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, getIdentifierType().getFormat());
+    	} else if (getIdentifierType() != null && isLocationPrefixedIdentifierSource) {
+    		System.out.println("Id " + identifier + ", format ");
+    		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT);
+    	}
+    	
 		if (this.minLength != null && this.minLength > 0) {
 			if (identifier.length() < this.minLength) {
 				throw new RuntimeException("Invalid configuration for IdentifierSource. Length minimum set to " + this.minLength + " but generated " + identifier);
@@ -181,10 +224,20 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 		if(nextSequenceValue == null) return -1l;
 		return nextSequenceValue;
 	}
+	
  	/**
 	 * @param nextSequenceValue : set the next identifier to be generated for this SequentialIdentifierGenerator
 	 */
 	public void setNextSequenceValue(Long nextSequenceValue) {
 		this.nextSequenceValue = nextSequenceValue;
 	}
+
+	public Boolean getIsLocationPrefixedIdentifierSource() {
+		return isLocationPrefixedIdentifierSource;
+	}
+
+	public void setIsLocationPrefixedIdentifierSource(Boolean isLocationPrefixedIdentifierSource) {
+		this.isLocationPrefixedIdentifierSource = isLocationPrefixedIdentifierSource;
+	}
+	
 }
