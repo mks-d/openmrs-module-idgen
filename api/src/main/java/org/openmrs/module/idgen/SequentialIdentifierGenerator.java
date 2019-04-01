@@ -35,7 +35,7 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 	private Integer maxLength; // If > 0, will always return identifiers no longer than this length
 	private String baseCharacterSet; // Enables configuration in appropriate Base	                                               
 	private Boolean isLocationPrefixedIdentifierSource = Boolean.FALSE; // Determines whether this generator should produce LocationPrefixedIdentifiers
-	private final String DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT = "[A-Z]{3,4}\\-[0]{3}\\-[0-9]{3}"; 
+	private final String DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT = "[A-Z]{3,5}\\-[0]{3}\\-[0-9]{3}"; 
 	private final String BRIDGE_FORMATING_FOR_LOCATION_PREFIXED_ID = "-000-";
 
     //***** INSTANCE METHODS *****
@@ -111,7 +111,7 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     	
     	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getFormat()) && isLocationPrefixedIdentifierSource) {
     		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, getIdentifierType().getFormat());
-    	} else if (getIdentifierType() != null && isLocationPrefixedIdentifierSource) {
+    	} else if (isLocationPrefixedIdentifierSource) {
     		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT);
     	}
     	

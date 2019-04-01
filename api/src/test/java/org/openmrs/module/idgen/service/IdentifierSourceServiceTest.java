@@ -64,11 +64,11 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 		Assert.assertEquals(sig.toString(), "[G-0, H-8, I-5, J-3, K-1, L-9, M-7]");
 	}
 	
-	@Ignore
 	@Test
 	public void generateIdentifiers_shouldReturnLocationPrefixedIdentifiers() {
 		IdentifierSource is = identifierSourceService.getIdentifierSource(8);
 		List<String>  sig = identifierSourceService.generateIdentifiers(is, 7, null);
+		Assert.assertEquals(sig.toString(), "[AFDEL-000-005, AFDEL-000-006, AFDEL-000-007, AFDEL-000-008, AFDEL-000-009, AFDEL-000-010, AFDEL-000-011]");
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 	@Verifies(value = "should return all identifier sources", method = "getAllIdentifierSources(boolean)")
 	public void getAllIdentifierSources_shouldReturnAllIdentifierSources() throws Exception {
 		List<IdentifierSource>  sig = identifierSourceService.getAllIdentifierSources(false);
-		Assert.assertTrue(sig.size() == 7);
+		Assert.assertTrue(sig.size() == 8);
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
     public void getIdentifierSourcesByPatientIdentifierType_shouldGetIdentifierSourcesByPatientIdentifierType() {
         PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierType(1);
         List<IdentifierSource> identifierSource = identifierSourceService.getIdentifierSourcesByType(patientIdentifierType);
-        Assert.assertEquals(3, identifierSource.size());
+        Assert.assertEquals(2, identifierSource.size());
     }
 
     @Test
