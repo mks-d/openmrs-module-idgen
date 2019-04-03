@@ -105,6 +105,10 @@
                 <th align="right"><spring:message code="idgen.maxLength" />:</th>
                 <td><frm:input path="maxLength" size="10" /><frm:errors path="maxLength" cssClass="error" /></td>
             </tr>
+            <tr>
+                <th align="right"><spring:message code="idgen.isLocationPrefixedIdentifierSource" />:</th>
+                <td><frm:checkbox path="isLocationPrefixedIdentifierSource" /><frm:errors path="isLocationPrefixedIdentifierSource" cssClass="error" /></td>
+            </tr>
         </c:if>
 		<c:if test="${source['class'].name == 'org.openmrs.module.idgen.RemoteIdentifierSource'}">
 			<tr>

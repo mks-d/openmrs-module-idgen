@@ -16,10 +16,10 @@ package org.openmrs.module.idgen;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.api.InvalidIdentifierFormatException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.patient.IdentifierValidator;
-import org.openmrs.validator.PatientIdentifierValidator;
 
 /**
  * Auto-generating Identifier Source, which returns Identifiers in sequence
@@ -61,11 +61,14 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     	// If this is a location-prefixed source and has not yet produced any identifiers; Initialize the prefix
     	if (isLocationPrefixedIdentifierSource && !isInitialized() || StringUtils.isEmpty(prefix)) {
     		Location currentLocation = Context.getUserContext().getLocation();
+    		System.out.println(currentLocation);
     		if (currentLocation != null) {
     			Location parentLocation = currentLocation.getParentLocation();
+        		System.out.println("Parent loc " + parentLocation);
     			if (parentLocation != null) {
     				for (Object ob : parentLocation.getActiveAttributes().toArray()) {
     					LocationAttribute att = (LocationAttribute) ob;
+    					System.out.println("att:" + att.getValue());
     					// TODO : Handle hardcoding for 'Prefix', introduce a GP for it?
     					if (att.getAttributeType().getName().equals("Prefix")) {
     						// Set the prefix
@@ -110,9 +113,13 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     	}
     	
     	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getFormat()) && isLocationPrefixedIdentifierSource) {
-    		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, getIdentifierType().getFormat());
+    		if (!identifier.matches(getIdentifierType().getFormat())) {
+    			throw new InvalidIdentifierFormatException("Identifier " + identifier + " does not match : " + getIdentifierType().getFormat());
+    		}
     	} else if (isLocationPrefixedIdentifierSource) {
-    		PatientIdentifierValidator.checkIdentifierAgainstFormat(identifier, DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT);
+    		if (!identifier.matches(DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT)) {
+    			throw new InvalidIdentifierFormatException("Identifier " + identifier + " does not match : " + DEFAULT_LOCATION_PREFIXED_IDENTIFIER_FORMAT);
+    		}
     	}
     	
 		if (this.minLength != null && this.minLength > 0) {
