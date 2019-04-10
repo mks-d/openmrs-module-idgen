@@ -37,6 +37,14 @@
 					<key><value>org.openmrs.module.idgen.IdentifierPool</value></key>
 					<bean class="org.openmrs.module.idgen.processor.IdentifierPoolProcessor"/>
 				</entry>
+				<entry>
+					<key><value>org.openmrs.module.idgen.LocationPrefixedSequentialIdentifierGenerator</value></key>
+					<bean class="org.openmrs.module.idgen.processor.SequentialIdentifierGeneratorProcessor">
+                        <property name="identifierSourceService">
+                            <ref bean="baseIdentifierSourceService" />
+                        </property>
+                    </bean>
+				</entry>
 			</map>
 		</property>
 	</bean>

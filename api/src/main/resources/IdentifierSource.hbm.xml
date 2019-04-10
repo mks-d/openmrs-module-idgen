@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd" >
-
 <hibernate-mapping package="org.openmrs.module.idgen" >
 
-	<class name="IdentifierSource" table="idgen_identifier_source" abstract="true">
-	
-		<id name="id" type="int" column="id" unsaved-value="0"><generator class="native" /></id>
+	<class name="IdentifierSource" table="idgen_identifier_source" abstract="true" >
+		<id name="id" type="int" column="id" unsaved-value="0">
+			<generator class="native" />
+		</id>
+		<discriminator column="source_type" />
 		<property name="uuid" type="string" length="38" not-null="true" />
 		<property name="name" type="string" not-null="true" />
 		<property name="description" type="string" />
@@ -24,38 +25,46 @@
 			<element column="identifier" type="string"/>
 		</set>
 		
-		<joined-subclass name="SequentialIdentifierGenerator" table="idgen_seq_id_gen">
-			<key column="id"/>
-			<property name="nextSequenceValue" type="long" access="field" insert="false" update="false">
-				<column name="next_sequence_value" default="-1" not-null="true"/>
-			</property>
-			<property name="baseCharacterSet" type="string" column="base_character_set" not-null="true" />
-			<property name="firstIdentifierBase" type="string" column="first_identifier_base" not-null="true" />
-			<property name="prefix" type="string" />
-			<property name="suffix" type="string" />
-			<property name="minLength" type="int" column="min_length" />
-            <property name="maxLength" type="int" column="max_length" />
-        </joined-subclass>
+		<subclass name="SequentialIdentifierGenerator" discriminator-value="SEQUENTIAL">
+			<join table="idgen_seq_id_gen">
+				<key column="id"/>
+				<property name="nextSequenceValue" type="long" access="field" insert="false" update="false">
+					<column name="next_sequence_value" default="-1" not-null="true"/>
+				</property>
+				<property name="baseCharacterSet" type="string" column="base_character_set" not-null="true" />
+				<property name="firstIdentifierBase" type="string" column="first_identifier_base" not-null="true" />
+				<property name="prefix" type="string" />
+				<property name="suffix" type="string" />
+				<property name="minLength" type="int" column="min_length" />
+	            <property name="maxLength" type="int" column="max_length" />
+			</join>
+			<subclass name="LocationPrefixedSequentialIdentifierGenerator" discriminator-value="LOCATION_PREFIXED"></subclass> 
+        </subclass>
 
-		<joined-subclass name="RemoteIdentifierSource" table="idgen_remote_source">
-			<key column="id"/>
-			<property name="url" type="string" not-null="true" />
-            <property name="user" type="string" not-null="false" />
-            <property name="password" type="string" not-null="false" />
-		</joined-subclass>
+		<subclass name="RemoteIdentifierSource" discriminator-value="REMOTE">
+			<join table="idgen_remote_source">
+				<key column="id"/>
+				<property name="url" type="string" not-null="true" />
+	            <property name="user" type="string" not-null="false" />
+	            <property name="password" type="string" not-null="false" />
+			</join>
+		</subclass>
 
-		<joined-subclass name="IdentifierPool" table="idgen_id_pool">
-			<key column="id"/>
-			<many-to-one name="source" class="IdentifierSource" lazy="false" />
-			<property name="batchSize" type="int" column="batch_size" />
-			<property name="minPoolSize" type="int" column="min_pool_size" />
-            <property name="refillWithScheduledTask" type="java.lang.Boolean" column="refill_with_scheduled_task" length="1" not-null="true"/>
-            <property name="sequential" type="java.lang.Boolean" length="1" not-null="true"/>
+		<subclass name="IdentifierPool" discriminator-value="POOL">
 			<set name="identifiers" lazy="true" cascade="all-delete-orphan" inverse="true" access="field">
-				<key column="pool_id" not-null="true" />
-				<one-to-many class="PooledIdentifier" />
+					<key column="pool_id" not-null="true" />
+					<one-to-many class="PooledIdentifier" />
 			</set>
-		</joined-subclass>
+			<join table="idgen_id_pool">
+				<key column="id"/>
+				<property name="batchSize" type="int" column="batch_size" />
+				<property name="minPoolSize" type="int" column="min_pool_size" />
+	            <property name="refillWithScheduledTask" type="java.lang.Boolean" column="refill_with_scheduled_task" length="1" not-null="true"/>
+	            <property name="sequential" type="java.lang.Boolean" length="1" not-null="true"/>
+	            <many-to-one name="source" class="IdentifierSource" lazy="false" />
+				
+			</join>
+		</subclass> 
 		
 	</class>
 	

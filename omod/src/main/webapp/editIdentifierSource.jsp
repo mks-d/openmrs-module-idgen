@@ -106,6 +106,41 @@
                 <td><frm:input path="maxLength" size="10" /><frm:errors path="maxLength" cssClass="error" /></td>
             </tr>
         </c:if>
+        <c:if test="${source['class'].name == 'org.openmrs.module.idgen.LocationPrefixedSequentialIdentifierGenerator'}">
+			<tr>
+				<th align="right">
+					<span class="requiredField">*</span>
+					<spring:message code="idgen.baseCharacterSet" />:
+				</th>
+				<td><frm:input path="baseCharacterSet" size="80" /><frm:errors path="baseCharacterSet" cssClass="error" /></td>
+			</tr>
+			<tr>
+				<th align="right" valign="top">
+					<span class="requiredField">*</span>
+					<spring:message code="idgen.firstIdentifierBase" />:
+				</th>
+				<td>
+					<c:choose>
+						<c:when test="${source.initialized}">
+							<frm:hidden path="firstIdentifierBase"/>
+							${source.firstIdentifierBase}
+							<spring:message code="idgen.inUseUnableToModify" />
+						</c:when>
+						<c:otherwise>
+							<frm:input path="firstIdentifierBase" size="20" /><frm:errors path="firstIdentifierBase" cssClass="error" />
+						</c:otherwise>
+					</c:choose>
+				</td>
+			</tr>
+			<tr>
+				<th align="right"><spring:message code="idgen.minLength" />:</th>
+				<td><frm:input path="minLength" size="10" /><frm:errors path="minLength" cssClass="error" /></td>
+			</tr>
+            <tr>
+                <th align="right"><spring:message code="idgen.maxLength" />:</th>
+                <td><frm:input path="maxLength" size="10" /><frm:errors path="maxLength" cssClass="error" /></td>
+            </tr>
+        </c:if>
 		<c:if test="${source['class'].name == 'org.openmrs.module.idgen.RemoteIdentifierSource'}">
 			<tr>
 				<th align="right">
