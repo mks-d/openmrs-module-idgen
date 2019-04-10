@@ -15,6 +15,9 @@ package org.openmrs.module.idgen;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.test.Verifies;
 
 public class IdgenUtilTest {
@@ -28,10 +31,92 @@ public class IdgenUtilTest {
 		char[] hexChars = "0123456789ABCDEF".toCharArray();
 		long numericValue = 43804337214L;
 		String hexValue = IdgenUtil.convertToBase(numericValue, hexChars, 0);
-		System.out.println("Converted from numeric: " + numericValue + " to hex: " + hexValue);
 		Assert.assertEquals("A32F1243E", hexValue);
 		long back = IdgenUtil.convertFromBase(hexValue, hexChars);
 		Assert.assertEquals(numericValue, back);	
+	}
+	
+	@Test
+	public void getLocationPrefixRecursively_shouldPickTheNearestValidPrefixUpTheTree() {
+		Assert.assertEquals("KBSD", IdgenUtil.getLocationPrefixRecursively(createLocationTree()));
+	}
+	
+	@Test
+	public void getLocationPrefixRecursively_shouldClimbToTopOfTheTreeAndPickValidPrefixIfOneIsSet() {
+		Location registrationDesk = createLocationTree();
+		LocationAttribute ksPrefixAtt = registrationDesk.getParentLocation().getParentLocation().getActiveAttributes().iterator().next();
+		// Invalidate prefix attribute for a location found in the middle of the tree
+		ksPrefixAtt.setValue("invalid prefix");
+		Assert.assertEquals("AFDEL", IdgenUtil.getLocationPrefixRecursively(registrationDesk));
+	}
+	
+	@Test(expected = RuntimeException.class)
+	public void getLocationPrefixRecursively_throwAnExceptionIfNoValidPrefixIsFound() {
+		Location location = createLocationTree();
+		// Invalidate valid prefixes
+		LocationAttribute ksPrefixAtt = location.getParentLocation().getParentLocation().getActiveAttributes().iterator().next();
+		ksPrefixAtt.setValue(" ");
+		LocationAttribute afPrefixAtt = location.getParentLocation().getParentLocation().getParentLocation().getActiveAttributes().iterator().next();
+		afPrefixAtt.setValue(" ");
+		
+		IdgenUtil.getLocationPrefixRecursively(location);
+	}
+	
+	@Test
+	public void getLocationPrefixRecursively_shouldPickThePrefixFromCurrentLocationIfOneIsSet() {
+		Location registrationDesk = createLocationTree();
+		LocationAttributeType prefixAttrType = createPrefixAttributeType();
+		LocationAttribute prefixAtt = new LocationAttribute();
+		prefixAtt.setAttributeType(prefixAttrType);
+		// Valid prefix 
+		prefixAtt.setValue("REGD");
+		registrationDesk.addAttribute(prefixAtt);
+		Assert.assertEquals("REGD", IdgenUtil.getLocationPrefixRecursively(registrationDesk));
+	}
+	
+	private Location createLocationTree() {
+		Location mainReg = new Location();
+		mainReg.setName("Registration Desk");
+		
+		Location kch = new Location();
+		kch.setName("Kaboul Central Hospital");
+		kch.addChildLocation(mainReg);
+		
+		LocationAttributeType prefixAttrType = createPrefixAttributeType();
+		LocationAttribute kchPrefixAtt = new LocationAttribute();
+		kchPrefixAtt.setAttributeType(prefixAttrType);
+		// Invalid prefix 
+		kchPrefixAtt.setValue("AFnmDEL");
+		kch.addAttribute(kchPrefixAtt);
+		
+		Location ks = new Location();
+		ks.setName("Kaboul Subdelegation");
+		ks.addChildLocation(kch);
+		
+		LocationAttribute ksPrefixAtt = new LocationAttribute();
+		ksPrefixAtt.setAttributeType(prefixAttrType);
+		// Valid prefix 
+		ksPrefixAtt.setValue("KBSD");
+		ks.addAttribute(ksPrefixAtt);
+		
+		Location af = new Location();
+		af.setName("Afghanistan Delegation");
+		af.addChildLocation(ks);
+		
+		LocationAttribute afPrefixAtt = new LocationAttribute();
+		afPrefixAtt.setAttributeType(prefixAttrType);
+		afPrefixAtt.setValue("AFDEL");
+		af.addAttribute(afPrefixAtt);
+		return mainReg;
+	}
+	
+	private LocationAttributeType createPrefixAttributeType() {
+		LocationAttributeType prefixAttrType = new LocationAttributeType();
+		prefixAttrType.setName("Prefix");
+		prefixAttrType.setMinOccurs(0);
+		prefixAttrType.setMaxOccurs(5);
+		prefixAttrType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
+		return prefixAttrType;
 	}
 
 }

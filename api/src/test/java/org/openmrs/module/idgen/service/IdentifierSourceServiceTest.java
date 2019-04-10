@@ -50,6 +50,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
     public void beforeEachTest() throws Exception {
 
         executeDataSet("org/openmrs/module/idgen/include/TestData.xml");
+		Context.getUserContext().setLocationId(13);
     }
 	
 	/**
@@ -62,6 +63,13 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 		List<String>  sig = identifierSourceService.generateIdentifiers(is, 7, "hello");
 		Assert.assertEquals(sig.toString(), "[G-0, H-8, I-5, J-3, K-1, L-9, M-7]");
 	}
+	
+	@Test
+	public void generateIdentifiers_shouldReturnLocationPrefixedIdentifiers() {
+		IdentifierSource is = identifierSourceService.getIdentifierSource(8);
+		List<String>  sig = identifierSourceService.generateIdentifiers(is, 4, null);
+		Assert.assertEquals(sig.toString(), "[AFDEL-000-000005, AFDEL-000-000006, AFDEL-000-000007, AFDEL-000-000008]");
+	}
 
 	/**
 	 * @see {@link IdentifierSourceService#getAllIdentifierSources(boolean)}
@@ -70,7 +78,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 	@Verifies(value = "should return all identifier sources", method = "getAllIdentifierSources(boolean)")
 	public void getAllIdentifierSources_shouldReturnAllIdentifierSources() throws Exception {
 		List<IdentifierSource>  sig = identifierSourceService.getAllIdentifierSources(false);
-		Assert.assertTrue(sig.size() == 7);
+		Assert.assertTrue(sig.size() == 8);
 	}
 
 	/**
@@ -154,8 +162,8 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 		
 		Assert.assertNotNull(source.getId());
 		IdentifierSource s = identifierSourceService.getIdentifierSource(source.getId());
-		Assert.assertEquals(s.getClass(), SequentialIdentifierGenerator.class);
-		Assert.assertEquals(s.getName(), name);
+		Assert.assertEquals(SequentialIdentifierGenerator.class, s.getClass());
+		Assert.assertEquals(name, s.getName());
 		Assert.assertEquals(((SequentialIdentifierGenerator) s).getBaseCharacterSet(), baseChars);
 	}
 

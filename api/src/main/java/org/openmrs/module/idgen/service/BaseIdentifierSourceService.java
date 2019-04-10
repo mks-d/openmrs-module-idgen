@@ -24,6 +24,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.idgen.AutoGenerationOption;
 import org.openmrs.module.idgen.IdentifierPool;
 import org.openmrs.module.idgen.IdentifierSource;
+import org.openmrs.module.idgen.LocationPrefixedSequentialIdentifierGenerator;
 import org.openmrs.module.idgen.LogEntry;
 import org.openmrs.module.idgen.PooledIdentifier;
 import org.openmrs.module.idgen.RemoteIdentifierSource;
@@ -75,6 +76,7 @@ public class BaseIdentifierSourceService extends BaseOpenmrsService implements I
 		sourceTypes.add(SequentialIdentifierGenerator.class);
 		sourceTypes.add(RemoteIdentifierSource.class);
 		sourceTypes.add(IdentifierPool.class);
+		sourceTypes.add(LocationPrefixedSequentialIdentifierGenerator.class);
 		return sourceTypes;
 	}
 

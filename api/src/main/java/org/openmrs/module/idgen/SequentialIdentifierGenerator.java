@@ -27,10 +27,10 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 	private Long nextSequenceValue; //not used: declared only so that Hibernate creates the column when running tests
     private String prefix; // Optional prefix
     private String suffix; // Optional suffix
-    private String firstIdentifierBase; // First identifier to start at
-	private Integer minLength; // If > 0, will always return identifiers with a minimum of this length
-	private Integer maxLength; // If > 0, will always return identifiers no longer than this length
-    private String baseCharacterSet; // Enables configuration in appropriate Base
+    public String firstIdentifierBase; // First identifier to start at
+    public Integer minLength; // If > 0, will always return identifiers with a minimum of this length
+    public Integer maxLength; // If > 0, will always return identifiers no longer than this length
+    public String baseCharacterSet; // Enables configuration in appropriate Base
 
     //***** INSTANCE METHODS *****
 

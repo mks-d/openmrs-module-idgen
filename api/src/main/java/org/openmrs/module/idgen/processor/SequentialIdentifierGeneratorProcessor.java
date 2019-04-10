@@ -13,13 +13,11 @@
  */
 package org.openmrs.module.idgen.processor;
 
-import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.IdgenUtil;
+import org.openmrs.module.idgen.LocationPrefixedSequentialIdentifierGenerator;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -58,15 +56,28 @@ public class SequentialIdentifierGeneratorProcessor implements IdentifierSourceP
     	
     	List<String> identifiers = new ArrayList<String>();
     	
-    	for (int i=0; i<batchSize;) {
-    		String val = seq.getIdentifierForSeed(sequenceValue);
-    		if (!reservedIdentifiers.contains(val)) {
-    			identifiers.add(val);
-    			i++;
-    		}
-	    	sequenceValue++;
-    	}
+    	if (seq instanceof LocationPrefixedSequentialIdentifierGenerator) {
+    		LocationPrefixedSequentialIdentifierGenerator locationPrefifixedGen = (LocationPrefixedSequentialIdentifierGenerator) seq;
+    		for (int i=0; i<batchSize;) {
+        		String val = locationPrefifixedGen.getIdentifierForSeed(sequenceValue);
+        		if (!reservedIdentifiers.contains(val)) {
+        			identifiers.add(val);
+        			i++;
+        		}
+    	    	sequenceValue++;
+        	}
 
+    	} else {
+    		for (int i=0; i<batchSize;) {
+        		String val = seq.getIdentifierForSeed(sequenceValue);
+        		if (!reservedIdentifiers.contains(val)) {
+        			identifiers.add(val);
+        			i++;
+        		}
+    	    	sequenceValue++;
+        	}
+
+    	}
         identifierSourceService.saveSequenceValue(seq, sequenceValue);
 
     	return identifiers;

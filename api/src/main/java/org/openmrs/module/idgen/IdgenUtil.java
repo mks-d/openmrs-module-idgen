@@ -19,8 +19,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
 
 /**
  * Useful utility methods
@@ -97,5 +100,33 @@ public class IdgenUtil {
 			}
 		}
 		return contents;
+	}
+	
+	/**
+	 * Convenience method for getting a valid prefix from a parent location with a valid prefix attribute up the tree
+	 * 
+	 * @param location the child location. Normally the location for the current {@link UserContext}
+	 * @return prefix
+	 */
+	public static String getLocationPrefixRecursively(Location location) {
+		if (location != null) {
+			for (Object ob : location.getActiveAttributes().toArray()) {
+				LocationAttribute att = (LocationAttribute) ob;
+				// TODO : Handle hardcoding for 'Prefix', introduce a GP for it?
+				if (att.getAttributeType().getName().equalsIgnoreCase("Prefix")) {
+					String prefix = (String) att.getValue();
+					// Do some validation.
+					// Only capitalized prefixes are accepted
+					if (StringUtils.isNotBlank(prefix) && prefix.toUpperCase().equals(prefix)) {
+						return prefix;
+					}
+				}
+			}
+		} else {
+			// This means we either reached the top of the location without a valid prefix found or there is no parent Location 
+			// up the tree with a prefix set
+			throw new RuntimeException("Lookedup this location tree and failed to find a location with a valid prefix location attribute");
+		}
+		return getLocationPrefixRecursively(location.getParentLocation());
 	}
 }
