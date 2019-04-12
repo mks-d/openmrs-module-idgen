@@ -25,6 +25,7 @@ import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.IdgenConstants;
 import org.openmrs.module.idgen.LogEntry;
 import org.openmrs.module.idgen.PooledIdentifier;
+import org.openmrs.module.idgen.PrefixProvider;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.processor.IdentifierSourceProcessor;
 import org.openmrs.util.OpenmrsConstants;
@@ -295,4 +296,11 @@ public interface IdentifierSourceService extends OpenmrsService {
      */
     List<String> generateIdentifiersInternal(Integer sourceId, Integer batchSize, String comment);
 
+    /**
+     * Convenience method for getting available {@link PrefixProvider}s. Implementations with new providers should override 
+     * this method.
+     * @return {@link PrefixProvider}s 
+     */
+    @Transactional(readOnly = true)
+	public List<Class<? extends PrefixProvider>> getPrefixProviders();
 }

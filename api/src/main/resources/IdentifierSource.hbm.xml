@@ -35,7 +35,7 @@
 			<property name="suffix" type="string" />
 			<property name="minLength" type="int" column="min_length" />
             <property name="maxLength" type="int" column="max_length" />
-            <property name="isLocationPrefixedIdentifierSource" type="java.lang.Boolean" length="1" not-null="true" column="is_location_prefixed_identifier_source"/>
+            <property name="prefixProviderName" type="string" column="prefix_provider_name"/>
         </joined-subclass>
 
 		<joined-subclass name="RemoteIdentifierSource" table="idgen_remote_source">

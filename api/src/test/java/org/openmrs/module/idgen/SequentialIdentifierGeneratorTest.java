@@ -9,11 +9,8 @@ import org.openmrs.LocationAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import junit.framework.Assert;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -110,7 +107,7 @@ public class SequentialIdentifierGeneratorTest {
 		generator.setBaseCharacterSet("0123456789");
 		generator.setFirstIdentifierBase("000");
 		generator.setName("Location Prefixed Sequential Identifier Source");
-		generator.setIsLocationPrefixedIdentifierSource(true);
+		generator.setPrefixProviderName("org.openmrs.module.idgen.LocationBasedPrefixProvider");
 		
 		UserContext userContext = mock(UserContext.class);
 		when(userContext.getLocation()).thenReturn(createLocationTree());
@@ -122,7 +119,7 @@ public class SequentialIdentifierGeneratorTest {
 	
 	private Location createLocationTree() {
 		LocationAttributeType prefixAttrType = new LocationAttributeType();
-		prefixAttrType.setName("Prefix");
+		prefixAttrType.setName(IdgenConstants.PREFIX_LOCATION_ATTRIBUTE_TYPE);
 		prefixAttrType.setMinOccurs(0);
 		prefixAttrType.setMaxOccurs(1);
 		prefixAttrType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
@@ -136,7 +133,7 @@ public class SequentialIdentifierGeneratorTest {
 		
 		LocationAttribute kchPrefixAtt = new LocationAttribute();
 		kchPrefixAtt.setAttributeType(prefixAttrType);
-		kchPrefixAtt.setValue("AFDEL");
+		kchPrefixAtt.setValue("AFDEL-000-");
 		kch.addAttribute(kchPrefixAtt);
 		
 		Location ks = new Location();

@@ -37,4 +37,9 @@ public class IdgenConstants {
 	 * Privilege which grants users permission to upload a batch of identifiers
 	 */
 	public static final String PRIV_UPLOAD_BATCH_OF_IDENTIFIERS = "Upload Batch of Identifiers";
+	
+	/**
+	 * LocationAttribute type for PatientIdentifier Prefixes.
+	 */
+	public static final String PREFIX_LOCATION_ATTRIBUTE_TYPE = "Location Code";
 }

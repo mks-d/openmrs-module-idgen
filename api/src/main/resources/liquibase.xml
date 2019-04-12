@@ -316,14 +316,14 @@
 				referencedColumnNames="patient_identifier_type_id"/>
  	</changeSet>
  	
- 	<changeSet id="hvgvhg8-hggc123bvh-yg8934b8" author="Mekom Solutions">
+ 	<changeSet id="vh89hg8-h9gc123bvh-yg8934b8" author="Mekom Solutions">
  		<preConditions onFail="MARK_RAN">
  			<tableExists tableName="idgen_seq_id_gen" />
-			<not><columnExists tableName="idgen_seq_id_gen" columnName="is_location_prefixed_identifier_source"/></not>
+			<not><columnExists tableName="idgen_seq_id_gen" columnName="prefix_provider_name"/></not>
  		</preConditions>
  		<addColumn tableName="idgen_seq_id_gen">
-			<column name="is_location_prefixed_identifier_source" type="tinyint(1)" defaultValue="0">
-				<constraints nullable="false"/>
+			<column name="prefix_provider_name" type="varchar(100)" >
+				<constraints nullable="true"/>
 			</column>
 		</addColumn>	
  	</changeSet>

@@ -24,8 +24,10 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.idgen.AutoGenerationOption;
 import org.openmrs.module.idgen.IdentifierPool;
 import org.openmrs.module.idgen.IdentifierSource;
+import org.openmrs.module.idgen.LocationBasedPrefixProvider;
 import org.openmrs.module.idgen.LogEntry;
 import org.openmrs.module.idgen.PooledIdentifier;
+import org.openmrs.module.idgen.PrefixProvider;
 import org.openmrs.module.idgen.RemoteIdentifierSource;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.processor.IdentifierSourceProcessor;
@@ -458,6 +460,16 @@ public class BaseIdentifierSourceService extends BaseOpenmrsService implements I
 		identifierSource.setRetired(true);
 		identifierSource.setRetireReason(reason);
 		dao.saveIdentifierSource(identifierSource);		
+	}
+	
+	/**
+	 * @see IdentifierSourceService#getPrefixProviders()
+	 */
+	@Override
+	public List<Class<? extends PrefixProvider>> getPrefixProviders() {
+		List<Class<? extends PrefixProvider>> providers = new ArrayList<Class<? extends PrefixProvider>>();
+		providers.add(LocationBasedPrefixProvider.class);
+		return providers;
 	}
 
 }
