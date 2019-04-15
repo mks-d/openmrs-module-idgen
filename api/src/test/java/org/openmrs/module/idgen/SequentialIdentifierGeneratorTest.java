@@ -2,7 +2,6 @@ package org.openmrs.module.idgen;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
@@ -33,7 +32,6 @@ public class SequentialIdentifierGeneratorTest {
 	public void setup() {
 		mockStatic(Context.class);
 		identifierSourceService = mock(IdentifierSourceService.class);
-		when(identifierSourceService.getSequenceValue(Mockito.any(SequentialIdentifierGenerator.class))).thenReturn(null);
 		
 	}
 
@@ -107,12 +105,13 @@ public class SequentialIdentifierGeneratorTest {
 		generator.setBaseCharacterSet("0123456789");
 		generator.setFirstIdentifierBase("000");
 		generator.setName("Location Prefixed Sequential Identifier Source");
-		generator.setPrefixProviderName("org.openmrs.module.idgen.LocationBasedPrefixProvider");
+		generator.setPrefixProviderBean("LocationBasedPrefixProvider");
 		
 		UserContext userContext = mock(UserContext.class);
 		when(userContext.getLocation()).thenReturn(createLocationTree());
 		when(Context.getUserContext()).thenReturn(userContext);
 		when(Context.getService(IdentifierSourceService.class)).thenReturn(identifierSourceService);
+		when(Context.getRegisteredComponent("LocationBasedPrefixProvider", PrefixProvider.class)).thenReturn(new LocationBasedPrefixProvider());
 		
 		assertThat(generator.getIdentifierForSeed(1L), is("AFDEL-000-001"));
 	}

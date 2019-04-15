@@ -10,6 +10,21 @@
 	.requiredField {font-weight:bold; color:red;}
 </style>
 
+<openmrs:htmlInclude file="/moduleResources/idgen/jquery-1.3.2.min.js"/>
+
+<script type="text/javascript" charset="utf-8">
+	jQuery(document).ready(function() {
+		jQuery('#prefixProviderBean').bind('change', function() {
+				if (jQuery("#prefixProviderBean").val()) {
+					// Once the 'prefixProviderName' is set, we don't need the 'prefix'
+					jQuery("#sequentialIdentifierGeneratorPrefixAtt").attr('disabled', 'disabled');
+				} else {
+					jQuery("#sequentialIdentifierGeneratorPrefixAtt").removeAttr('disabled');
+				}
+			});
+	});
+</script>
+
 <h3>
 	<c:choose>
 		<c:when test="${empty source.id}">
@@ -91,7 +106,7 @@
 			</tr>
 			<tr>
 				<th align="right"><spring:message code="idgen.prefix" />:</th>
-				<td><frm:input path="prefix" size="10" /><frm:errors path="prefix" cssClass="error" /></td>
+				<td><frm:input path="prefix" size="10" id="sequentialIdentifierGeneratorPrefixAtt"/><frm:errors path="prefix" cssClass="error" /></td>
 			</tr>
 			<tr>
 				<th align="right"><spring:message code="idgen.suffix" />:</th>
@@ -106,8 +121,14 @@
                 <td><frm:input path="maxLength" size="10" /><frm:errors path="maxLength" cssClass="error" /></td>
             </tr>
             <tr>
-                <th align="right"><spring:message code="idgen.isLocationPrefixedIdentifierSource" />:</th>
-                <td><frm:checkbox path="isLocationPrefixedIdentifierSource" /><frm:errors path="isLocationPrefixedIdentifierSource" cssClass="error" /></td>
+                <th align="right"><spring:message code="idgen.prefixProvider" />:</th>
+                <td>
+                	<frm:select path="prefixProviderBean" id="prefixProviderBean">
+                		<frm:option value=""></frm:option>
+                		<frm:options items="${prefixProviders}"/>
+                	</frm:select>
+                	<frm:errors path="prefixProviderBean" cssClass="error" />
+                </td>
             </tr>
         </c:if>
 		<c:if test="${source['class'].name == 'org.openmrs.module.idgen.RemoteIdentifierSource'}">

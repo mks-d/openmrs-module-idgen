@@ -52,7 +52,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
         executeDataSet("org/openmrs/module/idgen/include/TestData.xml");
         Context.getUserContext().setLocationId(13);
     }
-	
+    
 	/**
 	 * @see {@link IdentifierSourceService#generateIdentifiers(IdentifierSource, Integer, String)}
 	 */

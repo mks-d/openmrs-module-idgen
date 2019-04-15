@@ -1,7 +1,6 @@
 package org.openmrs.module.idgen.web.controller;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,12 +8,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +20,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierPool;
 import org.openmrs.module.idgen.IdentifierSource;
+import org.openmrs.module.idgen.PrefixProvider;
 import org.openmrs.module.idgen.RemoteIdentifierSource;
 import org.openmrs.module.idgen.RemoteIdentifiersMessage;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
@@ -105,6 +103,12 @@ public class IdentifierSourceController {
 				}
 			}
 			model.addAttribute("otherCompatibleSources", otherCompatibleSources);
+			
+			List<String> prefixProviderBeanNames = new ArrayList<String>();
+			for (Class<? extends PrefixProvider> clazz : iss.getPrefixProviders()) {
+				prefixProviderBeanNames.add(clazz.getSimpleName());
+			}			
+			model.addAttribute("prefixProviders", prefixProviderBeanNames);
 		}
     }
     

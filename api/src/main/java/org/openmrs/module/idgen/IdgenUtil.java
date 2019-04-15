@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.api.APIException;
-import org.openmrs.api.context.Context;
 
 /**
  * Useful utility methods
@@ -103,22 +102,7 @@ public class IdgenUtil {
 		}
 		return contents;
 	}
-	
-	public static Object getNewInstanceFromClassName(String className) {
-		try {
-			
-			Class<?> clazz = Context.loadClass(className);
-			if (clazz != null) {
-				return clazz.newInstance();
-			} else {
-				// Not load-able by the OpenmrsClassLoader
-				return Class.forName(className).newInstance();
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Error creating class instance", e);
-		}	
-	}
-	
+		
 	/**
 	 * Convenience method for getting a valid prefix from a parent location with a valid prefix attribute up the tree
 	 * 

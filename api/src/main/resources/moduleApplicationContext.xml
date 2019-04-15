@@ -40,7 +40,9 @@
 			</map>
 		</property>
 	</bean>
-
+	
+	<bean id="LocationBasedPrefixProvider" class="org.openmrs.module.idgen.LocationBasedPrefixProvider"/>
+	
 	<!--  Configure the Service -->
    	<bean parent="serviceContext" id="identifierSourceService">
 		<property name="moduleService">

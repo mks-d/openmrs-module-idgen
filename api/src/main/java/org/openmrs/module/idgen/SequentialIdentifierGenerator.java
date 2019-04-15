@@ -31,7 +31,7 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 	private Integer minLength; // If > 0, will always return identifiers with a minimum of this length
 	private Integer maxLength; // If > 0, will always return identifiers no longer than this length
     private String baseCharacterSet; // Enables configuration in appropriate Base
-    private String prefixProviderName;
+    private String prefixProviderBean;
     
     //***** INSTANCE METHODS *****
 
@@ -58,8 +58,8 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 
 		String identifier = IdgenUtil.convertToBase(seed, baseCharacterSet.toCharArray(), seqLength);
 
-    	if (prefixProviderName != null) {
-    		prefix = getPrefixProvider(prefixProviderName).getValue();
+    	if (prefixProviderBean != null) {
+    		prefix = getPrefixProvider(prefixProviderBean).getValue();
     		identifier = (prefix == null ? identifier : prefix + identifier);
     	} else {
     		identifier = (prefix == null ? identifier : prefix + identifier);
@@ -68,9 +68,14 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
     	
     	// Add check-digit, if required
     	if (getIdentifierType() != null && StringUtils.isNotEmpty(getIdentifierType().getValidator())) {
-			IdentifierValidator v = (IdentifierValidator)IdgenUtil.getNewInstanceFromClassName(getIdentifierType().getValidator());
-			identifier = v.getValidIdentifier(identifier);
-    		
+    		try {
+	    		Class<?> c = Context.loadClass(getIdentifierType().getValidator());
+	    		IdentifierValidator v = (IdentifierValidator)c.newInstance();
+	    		identifier = v.getValidIdentifier(identifier);
+    		}
+    		catch (Exception e) {
+    			throw new RuntimeException("Error generating check digit with " + getIdentifierType().getValidator(), e);
+    		}
     	}
 
 		if (this.minLength != null && this.minLength > 0) {
@@ -188,16 +193,16 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 		this.nextSequenceValue = nextSequenceValue;
 	}
 	
-	private PrefixProvider getPrefixProvider(String providerName) {
-		return (PrefixProvider) IdgenUtil.getNewInstanceFromClassName(providerName);
+	private PrefixProvider getPrefixProvider(String prefixProviderBean) {
+		return (PrefixProvider) Context.getRegisteredComponent(prefixProviderBean, PrefixProvider.class);
 	}
 
-	public String getPrefixProviderName() {
-		return prefixProviderName;
+	public String getPrefixProviderBean() {
+		return prefixProviderBean;
 	}
 
-	public void setPrefixProviderName(String prefixProviderName) {
-		this.prefixProviderName = prefixProviderName;
+	public void setPrefixProviderBean(String prefixProviderBean) {
+		this.prefixProviderBean = prefixProviderBean;
 	}
 
 }

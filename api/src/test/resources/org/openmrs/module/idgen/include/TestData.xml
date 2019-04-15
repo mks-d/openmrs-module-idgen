@@ -21,7 +21,7 @@
    	
    <IDGEN_SEQ_ID_GEN ID="1" first_identifier_base="1" NEXT_SEQUENCE_VALUE="6" base_character_set="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" PREFIX="" min_length="0" max_length="0" />
    <IDGEN_SEQ_ID_GEN ID="7" first_identifier_base="200000" NEXT_SEQUENCE_VALUE="11" base_character_set="0123456789" PREFIX="MRS" min_length="4" max_length="9" />
-   <IDGEN_SEQ_ID_GEN ID="8" first_identifier_base="000000" NEXT_SEQUENCE_VALUE="5" base_character_set="0123456789" PREFIX="" PREFIX_PROVIDER_NAME="org.openmrs.module.idgen.LocationBasedPrefixProvider" />
+   <IDGEN_SEQ_ID_GEN ID="8" first_identifier_base="000000" NEXT_SEQUENCE_VALUE="5" base_character_set="0123456789" PREFIX="" PREFIX_PROVIDER_BEAN="LocationBasedPrefixProvider" />
    
    <IDGEN_REMOTE_SOURCE ID="2" URL="http://localhost:8080/openmrs/module/idgen/getIdentifier" />
    <IDGEN_REMOTE_SOURCE ID="6" URL="http://localhost:8080/openmrs/module/idgen/getIdentifier" />

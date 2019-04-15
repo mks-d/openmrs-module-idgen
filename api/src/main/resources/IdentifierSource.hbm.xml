@@ -35,7 +35,7 @@
 			<property name="suffix" type="string" />
 			<property name="minLength" type="int" column="min_length" />
             <property name="maxLength" type="int" column="max_length" />
-            <property name="prefixProviderName" type="string" column="prefix_provider_name"/>
+            <property name="prefixProviderBean" type="string" column="prefix_provider_bean"/>
         </joined-subclass>
 
 		<joined-subclass name="RemoteIdentifierSource" table="idgen_remote_source">
