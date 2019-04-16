@@ -296,11 +296,4 @@ public interface IdentifierSourceService extends OpenmrsService {
      */
     List<String> generateIdentifiersInternal(Integer sourceId, Integer batchSize, String comment);
 
-    /**
-     * Convenience method for getting available {@link PrefixProvider}s. Implementations with new providers should override 
-     * this method.
-     * @return {@link PrefixProvider}s 
-     */
-    @Transactional(readOnly = true)
-	public List<Class<? extends PrefixProvider>> getPrefixProviders();
 }

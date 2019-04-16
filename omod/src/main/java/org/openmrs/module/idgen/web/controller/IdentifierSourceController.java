@@ -103,12 +103,7 @@ public class IdentifierSourceController {
 				}
 			}
 			model.addAttribute("otherCompatibleSources", otherCompatibleSources);
-			
-			List<String> prefixProviderBeanNames = new ArrayList<String>();
-			for (Class<? extends PrefixProvider> clazz : iss.getPrefixProviders()) {
-				prefixProviderBeanNames.add(clazz.getSimpleName());
-			}			
-			model.addAttribute("prefixProviders", prefixProviderBeanNames);
+			model.addAttribute("prefixProviders", getPrefixProviderBeanNames());
 		}
     }
     
@@ -320,4 +315,13 @@ public class IdentifierSourceController {
     		out.print(identifier + (i.hasNext() ? separator : ""));
     	}
     }
+    
+    private List<String> getPrefixProviderBeanNames() {
+    	List<String> prefixProviderBeanNames = new ArrayList<String>();
+		for (PrefixProvider provider : Context.getRegisteredComponents(PrefixProvider.class)) {
+			prefixProviderBeanNames.add(provider.getClass().getSimpleName());
+		}
+		return prefixProviderBeanNames;
+    }
+    
 }

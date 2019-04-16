@@ -461,15 +461,5 @@ public class BaseIdentifierSourceService extends BaseOpenmrsService implements I
 		identifierSource.setRetireReason(reason);
 		dao.saveIdentifierSource(identifierSource);		
 	}
-	
-	/**
-	 * @see IdentifierSourceService#getPrefixProviders()
-	 */
-	@Override
-	public List<Class<? extends PrefixProvider>> getPrefixProviders() {
-		List<Class<? extends PrefixProvider>> providers = new ArrayList<Class<? extends PrefixProvider>>();
-		providers.add(LocationBasedPrefixProvider.class);
-		return providers;
-	}
 
 }

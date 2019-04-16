@@ -194,7 +194,7 @@ public class SequentialIdentifierGenerator extends BaseIdentifierSource {
 	}
 	
 	private PrefixProvider getPrefixProvider(String prefixProviderBean) {
-		return (PrefixProvider) Context.getRegisteredComponent(prefixProviderBean, PrefixProvider.class);
+		return Context.getRegisteredComponent(prefixProviderBean, PrefixProvider.class);
 	}
 
 	public String getPrefixProviderBean() {

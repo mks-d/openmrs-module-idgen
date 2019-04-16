@@ -7,7 +7,6 @@ import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
-import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -25,13 +24,10 @@ import org.junit.Before;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
 public class SequentialIdentifierGeneratorTest {
-	
-	private IdentifierSourceService identifierSourceService;
-	
+		
 	@Before
 	public void setup() {
 		mockStatic(Context.class);
-		identifierSourceService = mock(IdentifierSourceService.class);
 		
 	}
 
@@ -100,20 +96,19 @@ public class SequentialIdentifierGeneratorTest {
 	}
 	
 	@Test
-	public void getIdentifierForSeed_shouldGenerateLocationPrefixedIdFromUnInitializedSource() {
+	public void getIdentifierForSeed_shouldGenerateLocationPrefixedIdFromLocationBasedPrefixProvider() {
 		SequentialIdentifierGenerator generator = new SequentialIdentifierGenerator();
 		generator.setBaseCharacterSet("0123456789");
 		generator.setFirstIdentifierBase("000");
 		generator.setName("Location Prefixed Sequential Identifier Source");
-		generator.setPrefixProviderBean("LocationBasedPrefixProvider");
+		generator.setPrefixProviderBean(LocationBasedPrefixProvider.class.getSimpleName());
 		
 		UserContext userContext = mock(UserContext.class);
 		when(userContext.getLocation()).thenReturn(createLocationTree());
 		when(Context.getUserContext()).thenReturn(userContext);
-		when(Context.getService(IdentifierSourceService.class)).thenReturn(identifierSourceService);
 		when(Context.getRegisteredComponent("LocationBasedPrefixProvider", PrefixProvider.class)).thenReturn(new LocationBasedPrefixProvider());
 		
-		assertThat(generator.getIdentifierForSeed(1L), is("AFDEL-000-001"));
+		assertThat(generator.getIdentifierForSeed(1L), is("AFDEL-001"));
 	}
 	
 	private Location createLocationTree() {
@@ -132,7 +127,7 @@ public class SequentialIdentifierGeneratorTest {
 		
 		LocationAttribute kchPrefixAtt = new LocationAttribute();
 		kchPrefixAtt.setAttributeType(prefixAttrType);
-		kchPrefixAtt.setValue("AFDEL-000-");
+		kchPrefixAtt.setValue("AFDEL-");
 		kch.addAttribute(kchPrefixAtt);
 		
 		Location ks = new Location();

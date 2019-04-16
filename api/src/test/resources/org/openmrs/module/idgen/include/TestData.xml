@@ -8,7 +8,7 @@
    <location location_id="13" name="Child Location 1" parent_location="12" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="400d343b-75ed-4243-af42-7b9b1b72f0a9"/>
    
    <location_attribute_type location_attribute_type_id="1" name="Location Code" datatype="org.openmrs.customdatatype.datatype.FreeTextDatatype" uuid="9516cc50-6f9f-11e0-8414-00109n378eb67e" creator="1" date_created="2019-04-01 00:00:00.0" min_occurs="0" retired="false" />
-   <location_attribute location_attribute_id="1" location_id="10" attribute_type_id="1" value_reference="AFDEL-000-" uuid="3a2bdb18-6faa-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" />
+   <location_attribute location_attribute_id="1" location_id="10" attribute_type_id="1" value_reference="AFDEL-" uuid="3a2bdb18-6faa-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" />
    
    <IDGEN_IDENTIFIER_SOURCE ID="1" UUID="0d47284f-9e9b-4a81-a88b-8bb42bc0a901" NAME="Test Sequential Generator" IDENTIFIER_TYPE="1" CREATOR="1" DATE_CREATED="2009-11-30 11:28:30.489" RETIRED="false" />
    <IDGEN_IDENTIFIER_SOURCE ID="2" UUID="0d47284f-9e9b-4a81-a88b-8bb42bc0a902" NAME="Test Remote Source" IDENTIFIER_TYPE="2" CREATOR="1" DATE_CREATED="2009-11-30 11:28:30.489" RETIRED="false" />

@@ -68,7 +68,7 @@ public class IdentifierSourceServiceTest extends IdgenBaseTest {
 	public void generateIdentifiers_shouldReturnLocationPrefixedIdentifiers() {
 		IdentifierSource is = identifierSourceService.getIdentifierSource(8);
 		List<String>  sig = identifierSourceService.generateIdentifiers(is, 4, null);
-		Assert.assertEquals(sig.toString(), "[AFDEL-000-000005, AFDEL-000-000006, AFDEL-000-000007, AFDEL-000-000008]");
+		Assert.assertEquals(sig.toString(), "[AFDEL-000005, AFDEL-000006, AFDEL-000007, AFDEL-000008]");
 	}
 
 	/**
