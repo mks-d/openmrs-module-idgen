@@ -23,17 +23,18 @@ public class LocationBasedPrefixProviderTest {
 	
 	LocationBasedPrefixProvider locationPrefixProvider;
 	UserContext userContext;
-	// user's current location
-	Location location1;
+	// user context locations
+	Location locationB3;
+	Location locationA3;
 	// Locations with prefix attribute
-	Location location2;
-	Location location4;
-	Location location7;
+	Location location3;
+	Location location5;
+	Location locationA2;
 	
 	@Before
 	public void setup() {
 		locationPrefixProvider = new LocationBasedPrefixProvider();
-		createLocationTree();
+		setupLocationTree();
 		mockStatic(Context.class);
 		userContext = mock(UserContext.class);
 		when(Context.getUserContext()).thenReturn(userContext);
@@ -41,100 +42,90 @@ public class LocationBasedPrefixProviderTest {
 	
 	@Test
 	public void getValue_shouldReturnPrefixDependingOnLocationInUserContext() {
-		when(userContext.getLocation()).thenReturn(location1);
-		Assert.assertThat(locationPrefixProvider.getValue(), is("REGD-"));
-		// Change to location 3
-		when(userContext.getLocation()).thenReturn(location2.getParentLocation());
-		Assert.assertThat(locationPrefixProvider.getValue(), is("AFDEL-"));
-		// Change to location 5
-		when(userContext.getLocation()).thenReturn(location4.getParentLocation());
-		Assert.assertThat(locationPrefixProvider.getValue(), is("KSUB-"));
+		when(userContext.getLocation()).thenReturn(locationB3);
+		Assert.assertThat(locationPrefixProvider.getValue(), is("LOC-5"));
+		// Change to location A3
+		when(userContext.getLocation()).thenReturn(locationA3);
+		Assert.assertThat(locationPrefixProvider.getValue(), is("LOC-A2"));
+
 	}
 	
 	@Test
 	public void getLocationPrefix_shouldPickTheNearestValidPrefixUpTheTree() {
-		Assert.assertEquals("REGD-", locationPrefixProvider.getLocationPrefix(location1));
+		Assert.assertEquals("LOC-A2", locationPrefixProvider.getLocationPrefix(locationA3));
 	}
 	
 	@Test
 	public void getLocationPrefix_shouldClimbToTopOfTheTreeAndPickValidPrefixIfOneIsSet() {
-		LocationAttribute location4PrefixAtt = location4.getActiveAttributes().iterator().next();
-		LocationAttribute location2PrefixAtt = location2.getActiveAttributes().iterator().next();
+		LocationAttribute locationA2PrefixAtt = locationA2.getActiveAttributes().iterator().next();
+		LocationAttribute location5PrefixAtt = location5.getActiveAttributes().iterator().next();
 		// Invalidate prefix attributes for locations found in the middle of the tree
-		location4PrefixAtt.setValue(" ");
-		location2PrefixAtt.setValue(" ");
-		Assert.assertEquals("KSUB-", locationPrefixProvider.getLocationPrefix(location1));
+		locationA2PrefixAtt.setValue(" ");
+		location5PrefixAtt.setValue(" ");
+		Assert.assertEquals("LOC-3", locationPrefixProvider.getLocationPrefix(locationA3));
 	}
 	
 	@Test(expected = RuntimeException.class)
 	public void getLocationPrefix_throwAnExceptionIfNoValidPrefixIsFound() {
 		// Invalidate valid prefixes
-		LocationAttribute location2PrefixAtt = location2.getActiveAttributes().iterator().next();
+		LocationAttribute location2PrefixAtt = location3.getActiveAttributes().iterator().next();
 		location2PrefixAtt.setValue(" ");
-		LocationAttribute location4PrefixAtt = location4.getActiveAttributes().iterator().next();
-		location4PrefixAtt.setValue(" ");
-		LocationAttribute location7PrefixAtt = location7.getActiveAttributes().iterator().next();
-		location7PrefixAtt.setValue(" ");
-		
-		locationPrefixProvider.getLocationPrefix(location1);
+		locationPrefixProvider.getLocationPrefix(location3);
 	}
 	
 	@Test
 	public void getLocationPrefixRecursively_shouldPickThePrefixFromCurrentLocationIfOneIsSet() {
-		LocationAttributeType prefixAttrType = createPrefixAttributeType();
-		LocationAttribute prefixAtt = new LocationAttribute();
-		prefixAtt.setAttributeType(prefixAttrType);
-		prefixAtt.setValue("REGD");
-		// add one at runtime
-		location1.addAttribute(prefixAtt);
-		Assert.assertEquals("REGD", locationPrefixProvider.getLocationPrefix(location1));
+		Assert.assertEquals("LOC-5", locationPrefixProvider.getLocationPrefix(location5));
 	}
 	
-	private void createLocationTree() {
-		location1 = new Location();
-		location1.setName("Location One");
+	private void setupLocationTree() {
+		Location location1 = new Location(); 
+		Location location2 = new Location();
+		location2.setParentLocation(location1);
 		
-		location2 = new Location();
-		location2.setName("Location Two");
-		location2.addChildLocation(location1);
+		location3 = new Location(); 
+		location3.setParentLocation(location2);
+		LocationAttribute location3PrefixAtt = new LocationAttribute();
+		location3PrefixAtt.setAttributeType(createPrefixAttributeType());
+		location3PrefixAtt.setValue("LOC-3");
+		location3.addAttribute(location3PrefixAtt);
 		
-		LocationAttribute location2PrefixAtt = new LocationAttribute();
-		location2PrefixAtt.setAttributeType(createPrefixAttributeType());
-		location2PrefixAtt.setValue("REGD-");
-		location2.addAttribute(location2PrefixAtt);
+		Location location4 = new Location();
+		location4.setParentLocation(location3);
 		
-		Location location3 = new Location();
-		location3.setName("Location Three");
-		location3.addChildLocation(location2);
-			
-		location4 = new Location();
-		location4.setName("Location Four");
-		location4.addChildLocation(location3);
+		location5 = new Location(); 
+		location5.setParentLocation(location4);
+		LocationAttribute location5PrefixAtt = new LocationAttribute();
+		location5PrefixAtt.setAttributeType(createPrefixAttributeType());
+		location5PrefixAtt.setValue("LOC-5");
+		location5.addAttribute(location5PrefixAtt);
 		
-		LocationAttribute location4PrefixAtt = new LocationAttribute();
-		location4PrefixAtt.setAttributeType(createPrefixAttributeType());
-		location4PrefixAtt.setValue("AFDEL-");
-		location4.addAttribute(location4PrefixAtt);
+		// First branch
+		Location locationA1 = new Location();
+		location5.addChildLocation(locationA1);
 		
-		Location location5 = new Location();
-		location5.setName("Location Five");
-		location5.addChildLocation(location4);
+		locationA2 = new Location(); 
+		locationA2.setParentLocation(locationA1);
+		LocationAttribute locationA2PrefixAtt = new LocationAttribute();
+		locationA2PrefixAtt.setAttributeType(createPrefixAttributeType());
+		locationA2PrefixAtt.setValue("LOC-A2");
+		locationA2.addAttribute(locationA2PrefixAtt);
 		
-		Location location6 = new Location();
-		location6.setName("Location Six");
-		location6.addChildLocation(location5);
+		locationA3 = new Location();
+		locationA3.setParentLocation(locationA2);
 		
-		location7 = new Location();
-		location7.setName("Location Seven");
-		location7.addChildLocation(location6);
+		// Second Branch
+		Location locationB1 = new Location();
+		location5.addChildLocation(locationB1);
+
+		Location locationB2 = new Location();
+		locationB2.setParentLocation(locationB1);
 		
-		LocationAttribute location7PrefixAtt = new LocationAttribute();
-		location7PrefixAtt.setAttributeType(createPrefixAttributeType());
-		location7PrefixAtt.setValue("KSUB-");
-		location7.addAttribute(location7PrefixAtt);
-		
+		locationB3 = new Location();
+		locationB3.setParentLocation(locationB2);
+
 	}
-	
+		
 	private LocationAttributeType createPrefixAttributeType() {
 		LocationAttributeType prefixAttrType = new LocationAttributeType();
 		prefixAttrType.setName(IdgenConstants.PREFIX_LOCATION_ATTRIBUTE_TYPE);
