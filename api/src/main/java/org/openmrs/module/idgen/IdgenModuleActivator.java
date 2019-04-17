@@ -15,6 +15,8 @@ package org.openmrs.module.idgen;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.LocationAttributeType;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.DaemonToken;
 import org.openmrs.module.DaemonTokenAware;
@@ -31,6 +33,7 @@ public class IdgenModuleActivator extends BaseModuleActivator implements DaemonT
 	@Override
 	public void started() {
 		IdgenTask.setEnabled(true);
+		initPrefixAttributeType();
 		log.info("Idgen Module Started...");
 	}
 
@@ -42,5 +45,19 @@ public class IdgenModuleActivator extends BaseModuleActivator implements DaemonT
 	@Override
 	public void setDaemonToken(DaemonToken token) {
 		IdgenTask.setDaemonToken(token);
+	}
+	
+	private void initPrefixAttributeType() {
+		for (LocationAttributeType existingType : Context.getLocationService().getAllLocationAttributeTypes()) {
+			if (existingType.getName().equals(IdgenConstants.PREFIX_LOCATION_ATTRIBUTE_TYPE) && !existingType.isRetired()) {
+				// The prefixAttributeType was already created
+				return;
+			}
+		}
+		LocationAttributeType prefixAttributeType = new LocationAttributeType();
+		prefixAttributeType.setName(IdgenConstants.PREFIX_LOCATION_ATTRIBUTE_TYPE);
+		prefixAttributeType.setMinOccurs(0);
+		prefixAttributeType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
+		Context.getLocationService().saveLocationAttributeType(prefixAttributeType);
 	}
 }

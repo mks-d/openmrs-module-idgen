@@ -20,11 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Location;
-import org.openmrs.LocationAttribute;
-import org.openmrs.api.APIException;
 
 /**
  * Useful utility methods
@@ -101,30 +97,5 @@ public class IdgenUtil {
 			}
 		}
 		return contents;
-	}
-		
-	/**
-	 * Convenience method for getting a valid prefix from a parent location with a valid prefix attribute up the tree
-	 * 
-	 * @param location The starting point location
-	 * @return prefix
-	 */
-	public static String getLocationPrefix(Location location) {
-		if (location != null) {
-			for (Object ob : location.getActiveAttributes().toArray()) {
-				LocationAttribute att = (LocationAttribute) ob;
-				if (att.getAttributeType().getName().equalsIgnoreCase(IdgenConstants.PREFIX_LOCATION_ATTRIBUTE_TYPE)) {
-					String prefix = (String) att.getValue();
-					if (StringUtils.isNotBlank(prefix)) {
-						return prefix;
-					}
-				}
-			}
-		} else {
-			// This means we either reached the top of the location without a valid prefix found or there is no parent Location 
-			// up the tree with a prefix set
-			throw new APIException("No location prefix could be found up the location tree.");
-		}
-		return getLocationPrefix(location.getParentLocation());
 	}
 }

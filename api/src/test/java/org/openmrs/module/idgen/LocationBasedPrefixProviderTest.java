@@ -21,12 +21,19 @@ import static org.hamcrest.core.Is.is;
 @PrepareForTest(Context.class)
 public class LocationBasedPrefixProviderTest {
 	
-	PrefixProvider locationPrefixProvider;
+	LocationBasedPrefixProvider locationPrefixProvider;
 	UserContext userContext;
+	// user's current location
+	Location location1;
+	// Locations with prefix attribute
+	Location location2;
+	Location location4;
+	Location location7;
 	
 	@Before
 	public void setup() {
 		locationPrefixProvider = new LocationBasedPrefixProvider();
+		createLocationTree();
 		mockStatic(Context.class);
 		userContext = mock(UserContext.class);
 		when(Context.getUserContext()).thenReturn(userContext);
@@ -34,53 +41,107 @@ public class LocationBasedPrefixProviderTest {
 	
 	@Test
 	public void getValue_shouldReturnPrefixDependingOnLocationInUserContext() {
-		when(userContext.getLocation()).thenReturn(createLocationTree());
+		when(userContext.getLocation()).thenReturn(location1);
 		Assert.assertThat(locationPrefixProvider.getValue(), is("REGD-"));
-		// Change location
-		when(userContext.getLocation()).thenReturn(createLocationTree().getParentLocation());
+		// Change to location 3
+		when(userContext.getLocation()).thenReturn(location2.getParentLocation());
 		Assert.assertThat(locationPrefixProvider.getValue(), is("AFDEL-"));
-		// replay
-		when(userContext.getLocation()).thenReturn(createLocationTree().getParentLocation().getParentLocation());
+		// Change to location 5
+		when(userContext.getLocation()).thenReturn(location4.getParentLocation());
 		Assert.assertThat(locationPrefixProvider.getValue(), is("KSUB-"));
 	}
 	
-	private Location createLocationTree() {
+	@Test
+	public void getLocationPrefix_shouldPickTheNearestValidPrefixUpTheTree() {
+		Assert.assertEquals("REGD-", locationPrefixProvider.getLocationPrefix(location1));
+	}
+	
+	@Test
+	public void getLocationPrefix_shouldClimbToTopOfTheTreeAndPickValidPrefixIfOneIsSet() {
+		LocationAttribute location4PrefixAtt = location4.getActiveAttributes().iterator().next();
+		LocationAttribute location2PrefixAtt = location2.getActiveAttributes().iterator().next();
+		// Invalidate prefix attributes for locations found in the middle of the tree
+		location4PrefixAtt.setValue(" ");
+		location2PrefixAtt.setValue(" ");
+		Assert.assertEquals("KSUB-", locationPrefixProvider.getLocationPrefix(location1));
+	}
+	
+	@Test(expected = RuntimeException.class)
+	public void getLocationPrefix_throwAnExceptionIfNoValidPrefixIsFound() {
+		// Invalidate valid prefixes
+		LocationAttribute location2PrefixAtt = location2.getActiveAttributes().iterator().next();
+		location2PrefixAtt.setValue(" ");
+		LocationAttribute location4PrefixAtt = location4.getActiveAttributes().iterator().next();
+		location4PrefixAtt.setValue(" ");
+		LocationAttribute location7PrefixAtt = location7.getActiveAttributes().iterator().next();
+		location7PrefixAtt.setValue(" ");
+		
+		locationPrefixProvider.getLocationPrefix(location1);
+	}
+	
+	@Test
+	public void getLocationPrefixRecursively_shouldPickThePrefixFromCurrentLocationIfOneIsSet() {
+		LocationAttributeType prefixAttrType = createPrefixAttributeType();
+		LocationAttribute prefixAtt = new LocationAttribute();
+		prefixAtt.setAttributeType(prefixAttrType);
+		prefixAtt.setValue("REGD");
+		// add one at runtime
+		location1.addAttribute(prefixAtt);
+		Assert.assertEquals("REGD", locationPrefixProvider.getLocationPrefix(location1));
+	}
+	
+	private void createLocationTree() {
+		location1 = new Location();
+		location1.setName("Location One");
+		
+		location2 = new Location();
+		location2.setName("Location Two");
+		location2.addChildLocation(location1);
+		
+		LocationAttribute location2PrefixAtt = new LocationAttribute();
+		location2PrefixAtt.setAttributeType(createPrefixAttributeType());
+		location2PrefixAtt.setValue("REGD-");
+		location2.addAttribute(location2PrefixAtt);
+		
+		Location location3 = new Location();
+		location3.setName("Location Three");
+		location3.addChildLocation(location2);
+			
+		location4 = new Location();
+		location4.setName("Location Four");
+		location4.addChildLocation(location3);
+		
+		LocationAttribute location4PrefixAtt = new LocationAttribute();
+		location4PrefixAtt.setAttributeType(createPrefixAttributeType());
+		location4PrefixAtt.setValue("AFDEL-");
+		location4.addAttribute(location4PrefixAtt);
+		
+		Location location5 = new Location();
+		location5.setName("Location Five");
+		location5.addChildLocation(location4);
+		
+		Location location6 = new Location();
+		location6.setName("Location Six");
+		location6.addChildLocation(location5);
+		
+		location7 = new Location();
+		location7.setName("Location Seven");
+		location7.addChildLocation(location6);
+		
+		LocationAttribute location7PrefixAtt = new LocationAttribute();
+		location7PrefixAtt.setAttributeType(createPrefixAttributeType());
+		location7PrefixAtt.setValue("KSUB-");
+		location7.addAttribute(location7PrefixAtt);
+		
+	}
+	
+	private LocationAttributeType createPrefixAttributeType() {
 		LocationAttributeType prefixAttrType = new LocationAttributeType();
 		prefixAttrType.setName(IdgenConstants.PREFIX_LOCATION_ATTRIBUTE_TYPE);
 		prefixAttrType.setMinOccurs(0);
-		prefixAttrType.setMaxOccurs(3);
+		prefixAttrType.setMaxOccurs(5);
 		prefixAttrType.setDatatypeClassname("org.openmrs.customdatatype.datatype.FreeTextDatatype");
-		
-		Location mainReg = new Location();
-		mainReg.setName("Main Registration");
-		
-		LocationAttribute mainRegPrefixAtt = new LocationAttribute();
-		mainRegPrefixAtt.setAttributeType(prefixAttrType);
-		mainRegPrefixAtt.setValue("REGD-");
-		mainReg.addAttribute(mainRegPrefixAtt);
-		
-		Location kch = new Location();
-		kch.setName("Kaboul Central Hospital");
-		kch.addChildLocation(mainReg);
-		
-		LocationAttribute kchPrefixAtt = new LocationAttribute();
-		kchPrefixAtt.setAttributeType(prefixAttrType);
-		kchPrefixAtt.setValue("AFDEL-");
-		kch.addAttribute(kchPrefixAtt);
-		
-		Location ks = new Location();
-		ks.setName("Kaboul Subdelegation");
-		ks.addChildLocation(kch);
-		
-		LocationAttribute ksPrefixAtt = new LocationAttribute();
-		ksPrefixAtt.setAttributeType(prefixAttrType);
-		ksPrefixAtt.setValue("KSUB-");
-		ks.addAttribute(ksPrefixAtt);
-		
-		Location af = new Location();
-		af.setName("Afghanistan Delegation");
-		af.addChildLocation(ks);
-		return mainReg;
+		return prefixAttrType;
 	}
 
 }
